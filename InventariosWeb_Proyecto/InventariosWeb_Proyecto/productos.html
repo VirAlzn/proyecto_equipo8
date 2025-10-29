@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="productosdiseño.css">
+  <title>Gestión de Productos</title>
+
+  <!-- Tailwind y fuentes -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+
+  <!-- Configuración de Tailwind -->
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3B82F6',
+            'background-light': '#F9FAFB',
+            'background-dark': '#111827',
+            'card-light': '#FFFFFF',
+            'card-dark': '#1F2937',
+            'text-light': '#1F2937',
+            'text-dark': '#F9FAFB',
+            'border-light': '#E5E7EB',
+            'border-dark': '#374151',
+          },
+          fontFamily: { display: ["Roboto", "sans-serif"] },
+          borderRadius: { DEFAULT: '0.5rem' },
+        },
+      },
+    };
+
+    function toggleTheme() {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    if (
+      localStorage.getItem('theme') === 'dark' ||
+      (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    ) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
+    // Confirmación de cierre de sesión
+    function cerrarSesion() {
+      const confirmar = confirm("¿Estás seguro de que deseas cerrar sesión?");
+      if (confirmar) {
+        alert("Sesión cerrada correctamente.");
+        window.location.href = "index.html";
+      } else {
+        alert("Continuarás en la sesión actual.");
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
+
+   <script>
+  const role = localStorage.getItem('userRole');
+
+  // Si no ha iniciado sesión
+  if (!role) {
+    window.location.href = 'index.html';
+  }
+
+  // Restricciones según el rol
+  const currentPage = window.location.pathname.split("/").pop();
+
+  if (role === 'Empleado' && (currentPage === 'usuario.html' || currentPage === 'reportes.html')) {
+    alert('No tienes permiso para acceder a esta sección.');
+    window.location.href = 'productos.html';
+  }
+</script>
+
+  <div class="flex flex-col min-h-screen pb-24" id="app">
+    <!-- Se agrega padding-bottom para que el nav no cubra nada -->
+
+    <!-- Encabezado -->
+    <header class="flex items-center justify-between p-4 bg-card-light dark:bg-card-dark border-b border-border-light dark:border-border-dark shadow-md">
+      <h1 class="text-xl font-bold">Productos</h1>
+      <button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" onclick="toggleTheme()">
+        <span class="material-icons block dark:hidden">dark_mode</span>
+        <span class="material-icons hidden dark:block">light_mode</span>
+      </button>
+    </header>
+
+    <!-- Barra de búsqueda -->
+    <div class="p-4">
+      <div class="relative">
+        <input id="search" type="text" placeholder="Buscar producto..."
+          class="w-full pl-10 pr-4 py-2 border border-border-light dark:border-border-dark rounded-full bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary">
+        <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+      </div>
+      <div class="flex justify-end mt-2 space-x-2">
+        <button class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-full hover:bg-blue-700">Buscar</button>
+        <button class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-full dark:bg-gray-600 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500">Mostrar Todos</button>
+      </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <main class="flex-grow p-4 overflow-y-auto">
+      <div class="mt-6 p-4 bg-card-light dark:bg-card-dark rounded-lg min-h-[150px] flex items-center justify-center shadow-md mb-6">
+        <p class="text-gray-500 dark:text-gray-400">Sin productos</p>
+      </div>
+
+      <!-- Agregar Producto -->
+      <div class="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md mb-6">
+        <h2 class="text-lg font-semibold mb-4">Agregar Producto</h2>
+        <form class="space-y-4" method="POST">
+          <div>
+            <label class="block text-sm font-medium" for="product_id_add">ID del Producto:</label>
+            <input id="product_id_add" type="text" class="input-field"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium" for="product_name_add">Nombre del Producto:</label>
+            <input id="product_name_add" type="text" class="input-field"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium" for="price_add">Precio:</label>
+            <input id="price_add" type="number" step="0.01" class="input-field"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium" for="stock_add">Stock:</label>
+            <input id="stock_add" type="number" class="input-field"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium" for="description_add">Descripción:</label>
+            <textarea id="description_add" rows="3" class="input-field"></textarea>
+          </div>
+          <div class="flex justify-end">
+            <button type="submit" class="btn-primary">
+              <span class="material-icons">add</span> Agregar
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Editar Producto -->
+      <div class="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md mt-6 mb-6">
+        <h2 class="text-lg font-semibold mb-4">Editar Producto</h2>
+        <form class="space-y-4" method="POST">
+          <div>
+            <label class="block text-sm font-medium" for="product_id_edit">ID del Producto:</label>
+            <input id="product_id_edit" type="text" class="input-field" readonly/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium" for="product_name_edit">Nombre del Producto:</label>
+            <input id="product_name_edit" type="text" class="input-field"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium" for="price_edit">Precio:</label>
+            <input id="price_edit" type="number" step="0.01" class="input-field"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium" for="stock_edit">Stock:</label>
+            <input id="stock_edit" type="number" class="input-field"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium" for="description_edit">Descripción:</label>
+            <textarea id="description_edit" rows="3" class="input-field"></textarea>
+          </div>
+          <div class="flex justify-between items-center">
+            <button type="button" class="btn-delete">
+              <span class="material-icons">delete</span> Eliminar
+            </button>
+            <button type="submit" class="btn-primary">
+              <span class="material-icons">save</span> Actualizar
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <!-- Barra de navegación (ajustada de posición) -->
+    <nav class="bg-card-light dark:bg-card-dark border-t border-border-light dark:border-border-dark shadow-lg fixed bottom-0 left-0 w-full z-50">
+      <div class="flex justify-around p-2">
+        <a href="usuario.html" class="nav-link">
+          <span class="material-icons">group</span>
+          <span class="text-xs">Usuario</span>
+        </a>
+        <a href="productos.html" class="nav-link active">
+          <span class="material-icons">inventory_2</span>
+          <span class="text-xs">Productos</span>
+        </a>
+        <a href="ventas.html" class="nav-link">
+          <span class="material-icons">point_of_sale</span>
+          <span class="text-xs">Ventas</span>
+        </a>
+        <a href="reportes.html" class="nav-link">
+          <span class="material-icons">bar_chart</span>
+          <span class="text-xs">Reportes</span>
+        </a>
+        <button onclick="cerrarSesion()" class="flex flex-col items-center text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400">
+          <span class="material-icons">logout</span>
+          <span class="text-xs">Salir</span>
+        </button>
+      </div>
+    </nav>
+
+  </div>
+</body>
+</html>

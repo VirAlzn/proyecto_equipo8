@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reporte de Ganancias Netas</title>
+
+  <!-- Fuentes e íconos -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="reportes.css" />
+
+  <script>
+    // ================== CONFIGURACIÓN DE TEMA ==================
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#38e07b",
+            "background-light": "#f6f8f7",
+            "background-dark": "#122017",
+            "card-light": "#ffffff",
+            "card-dark": "#1f2937",
+          },
+          fontFamily: {
+            display: ["Inter", "sans-serif"],
+          },
+        },
+      },
+    };
+
+    function toggleTheme() {
+      document.documentElement.classList.toggle("dark");
+      localStorage.setItem("theme",
+        document.documentElement.classList.contains("dark") ? "dark" : "light"
+      );
+    }
+
+    if (
+      localStorage.getItem("theme") === "dark" ||
+      (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)
+    ) {
+      document.documentElement.classList.add("dark");
+    }
+
+    // ================== FUNCIÓN DE CERRAR SESIÓN ==================
+    function cerrarSesion() {
+      const confirmar = confirm("¿Estás seguro de que deseas cerrar sesión?");
+      if (confirmar) {
+        alert("Sesión cerrada correctamente.");
+        window.location.href = "index.html";
+      } else {
+        alert("Continuarás en la sesión actual.");
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-200">
+
+   <script>
+  const role = localStorage.getItem('userRole');
+
+  // Si no ha iniciado sesión
+  if (!role) {
+    window.location.href = 'index.html';
+  }
+
+  // Restricciones según el rol
+  const currentPage = window.location.pathname.split("/").pop();
+
+  if (role === 'Empleado' && (currentPage === 'usuario.html' || currentPage === 'reportes.html')) {
+    alert('No tienes permiso para acceder a esta sección.');
+    window.location.href = 'productos.html';
+  }
+</script>
+
+  <div class="flex flex-col h-screen">
+    
+    <!-- ENCABEZADO -->
+    <header class="flex items-center justify-between p-4 border-b border-gray-300 dark:border-white/10 bg-card-light dark:bg-card-dark shadow">
+      <button onclick="window.history.back()" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+        <span class="material-icons">arrow_back</span>
+      </button>
+      <h1 class="text-xl font-bold">Reporte de Ganancias</h1>
+      <button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" onclick="toggleTheme()">
+        <span class="material-icons block dark:hidden">dark_mode</span>
+        <span class="material-icons hidden dark:block">light_mode</span>
+      </button>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="flex-1 overflow-y-auto p-6 space-y-8">
+      <!-- SELECCIÓN DE FECHAS -->
+      <div>
+        <h2 class="text-lg font-semibold mb-4">Seleccionar Período</h2>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="start-date" class="block text-sm font-medium mb-1">Desde</label>
+            <input id="start-date" type="date"
+              class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-background-light dark:bg-gray-800 focus:ring-primary focus:border-primary">
+          </div>
+          <div>
+            <label for="end-date" class="block text-sm font-medium mb-1">Hasta</label>
+            <input id="end-date" type="date"
+              class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-background-light dark:bg-gray-800 focus:ring-primary focus:border-primary">
+          </div>
+        </div>
+      </div>
+
+      <!-- DATOS DE GANANCIAS -->
+      <div class="space-y-4">
+        <div class="rounded-lg bg-gray-100 dark:bg-gray-800/50 p-4 flex justify-between items-center">
+          <p class="text-base font-medium">Total de Ventas</p>
+          <input id="ventas" type="number" placeholder="$0.00"
+            class="text-right font-semibold text-green-600 dark:text-primary bg-transparent border-b border-gray-400 focus:outline-none w-32 text-lg">
+        </div>
+
+        <div class="rounded-lg bg-gray-100 dark:bg-gray-800/50 p-4 flex justify-between items-center">
+          <p class="text-base font-medium">Total de Gastos</p>
+          <input id="gastos" type="number" placeholder="$0.00"
+            class="text-right font-semibold text-red-500 dark:text-red-400 bg-transparent border-b border-gray-400 focus:outline-none w-32 text-lg">
+        </div>
+      </div>
+
+      <!-- GANANCIA NETA -->
+      <div class="rounded-xl bg-primary/10 dark:bg-primary/20 p-6 shadow-lg border border-primary/20 dark:border-primary/30">
+        <div class="flex justify-between items-center">
+          <h2 class="text-xl font-bold">Ganancia Neta</h2>
+          <p id="resultado" class="text-3xl font-black text-primary">$0.00</p>
+        </div>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Ventas - Gastos</p>
+      </div>
+
+      <!-- BOTONES -->
+      <div class="flex gap-4">
+        <button id="calcular"
+          class="w-full bg-primary text-background-dark font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition">
+          <span class="material-icons">calculate</span> Calcular
+        </button>
+        <button id="exportar"
+          class="w-full bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition">
+          <span class="material-icons">download</span> Exportar
+        </button>
+      </div>
+    </main>
+
+    <!-- BARRA DE NAVEGACIÓN INFERIOR -->
+    <nav class="bg-card-light dark:bg-card-dark border-t border-border-light dark:border-border-dark shadow-lg">
+      <div class="flex justify-around p-2">
+        <a href="usuario.html" class="flex flex-col items-center text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary w-1/5">
+          <span class="material-icons">group</span>
+          <span class="text-xs">Usuarios</span>
+        </a>
+        <a href="productos.html" class="flex flex-col items-center text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary w-1/5">
+          <span class="material-icons">inventory_2</span>
+          <span class="text-xs">Productos</span>
+        </a>
+        <a href="ventas.html" class="flex flex-col items-center text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary w-1/5">
+          <span class="material-icons">point_of_sale</span>
+          <span class="text-xs">Ventas</span>
+        </a>
+        <a href="reportes.html" class="flex flex-col items-center text-primary w-1/5">
+          <span class="material-icons">bar_chart</span>
+          <span class="text-xs">Reportes</span>
+        </a>
+        <button onclick="cerrarSesion()" class="flex flex-col items-center text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 w-1/5">
+          <span class="material-icons">logout</span>
+          <span class="text-xs">Salir</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ================== SCRIPT FUNCIONAL ================== -->
+  <script>
+    const ventas = document.getElementById("ventas");
+    const gastos = document.getElementById("gastos");
+    const resultado = document.getElementById("resultado");
+    const calcularBtn = document.getElementById("calcular");
+    const exportarBtn = document.getElementById("exportar");
+
+    calcularBtn.addEventListener("click", () => {
+      const totalVentas = parseFloat(ventas.value) || 0;
+      const totalGastos = parseFloat(gastos.value) || 0;
+      const ganancia = totalVentas - totalGastos;
+      resultado.textContent = `$${ganancia.toFixed(2)}`;
+    });
+
+    exportarBtn.addEventListener("click", () => {
+      alert("Exportando reporte... (simulación)");
+    });
+  </script>
+</body>
+</html>

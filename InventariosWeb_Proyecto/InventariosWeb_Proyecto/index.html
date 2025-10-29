@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Iniciar Sesión</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#6366F1",
+            "background-light": "#F9FAFB",
+            "background-dark": "#111827",
+          },
+          fontFamily: {
+            display: ["Poppins", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "0.5rem",
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      min-height: max(884px, 100dvh);
+    }
+
+    /* 🔧 Solución al problema de no poder seleccionar el input */
+    .material-icons-outlined {
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display flex items-center justify-center min-h-screen">
+  <div class="w-full max-w-sm mx-auto p-8">
+    <header class="flex justify-between items-center mb-12">
+      <div></div>
+      <button id="theme-toggle" type="button"
+        class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
+        <span id="theme-icon" class="material-icons-outlined"></span>
+      </button>
+    </header>
+
+    <main class="w-full">
+      <div class="text-center mb-10">
+        <span class="material-icons-outlined text-primary text-6xl">account_circle</span>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mt-4">Iniciar Sesión</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-2">
+          ¡Bienvenido de nuevo! Por favor, inicia sesión para continuar.
+        </p>
+      </div>
+
+      <!-- ✅ Aquí el formulario ya se conecta al backend -->
+      <form id="loginForm" class="space-y-6" method="POST" action="php/login.php">
+        <div>
+          <label for="username" class="sr-only">Nombre de usuario</label>
+          <div class="relative">
+            <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">person_outline</span>
+            <input id="username" type="text" name="username" placeholder="Nombre de usuario"
+              class="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-gray-800 border-transparent focus:border-primary focus:ring-primary rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" required />
+          </div>
+        </div>
+
+        <div>
+          <label for="password" class="sr-only">Contraseña</label>
+          <div class="relative">
+            <span class="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">lock_outline</span>
+            <input id="password" type="password" name="password" placeholder="Contraseña"
+              class="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-gray-800 border-transparent focus:border-primary focus:ring-primary rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400" required />
+          </div>
+        </div>
+
+        <div>
+          <button type="submit"
+            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+            INICIAR SESIÓN
+          </button>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script>
+    // === Modo oscuro/claro ===
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    const htmlEl = document.documentElement;
+
+    function updateThemeIcon() {
+      themeIcon.textContent = htmlEl.classList.contains('dark') ? 'light_mode' : 'dark_mode';
+    }
+
+    if (localStorage.getItem('theme') === 'dark' ||
+      (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      htmlEl.classList.add('dark');
+    } else {
+      htmlEl.classList.remove('dark');
+    }
+    updateThemeIcon();
+
+    themeToggle.addEventListener('click', () => {
+      htmlEl.classList.toggle('dark');
+      localStorage.setItem('theme', htmlEl.classList.contains('dark') ? 'dark' : 'light');
+      updateThemeIcon();
+    });
+  </script>
+</body>
+</html>

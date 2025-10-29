@@ -1,0 +1,26 @@
+body {
+  min-height: max(884px, 100dvh);
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+@media (max-width: 640px) {
+  main {
+    padding: 1rem;
+  }
+  h1 {
+    font-size: 1.1rem;
+  }
+  h2 {
+    font-size: 1rem;
+  }
+}

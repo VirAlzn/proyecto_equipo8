@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Usuarios</title>
+
+  <!-- Fuentes y Tailwind -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <link rel="stylesheet" href="usuariosdiseño.css" />
+
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3B82F6',
+            'background-light': '#F9FAFB',
+            'background-dark': '#111827',
+            'card-light': '#FFFFFF',
+            'card-dark': '#1F2937',
+            'text-light': '#1F2937',
+            'text-dark': '#F9FAFB',
+            'border-light': '#E5E7EB',
+            'border-dark': '#374151',
+          },
+          fontFamily: {
+            display: ["Roboto", "sans-serif"],
+          },
+        },
+      },
+    };
+
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme',
+        document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+      );
+    }
+
+    if (localStorage.getItem('theme') === 'dark' ||
+      (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+
+    function cerrarSesion() {
+      const confirmar = confirm("¿Estás seguro de que deseas cerrar sesión?");
+      if (confirmar) {
+        alert("Sesión cerrada correctamente.");
+        localStorage.clear();
+        window.location.href = "index.html";
+      } else {
+        alert("Continuarás en la sesión actual.");
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
+
+  <!-- Restricción por rol (cliente) -->
+  <script>
+    const role = localStorage.getItem('userRole');
+    if (!role) window.location.href = 'index.html';
+    const currentPage = window.location.pathname.split("/").pop();
+    if (role === 'Empleado' && currentPage === 'usuario.html') {
+      alert('No tienes permiso para acceder a esta sección.');
+      window.location.href = 'productos.html';
+    }
+  </script>
+
+  <div class="flex flex-col h-screen" id="app">
+    <!-- Header -->
+    <header class="flex items-center justify-between p-4 bg-card-light dark:bg-card-dark border-b shadow-md">
+      <h1 class="text-xl font-bold">Gestión de Usuarios</h1>
+      <button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" onclick="toggleTheme()">
+        <span class="material-icons block dark:hidden">dark_mode</span>
+        <span class="material-icons hidden dark:block">light_mode</span>
+      </button>
+    </header>
+
+    <!-- Main -->
+    <main class="flex-grow p-4 overflow-y-auto mb-20">
+
+      <!-- Buscador -->
+      <div class="mb-6">
+        <div class="relative">
+          <input id="inputBuscar" type="text" placeholder="Buscar usuario..."
+            class="w-full pl-10 pr-4 py-2 border rounded-full bg-background-light dark:bg-background-dark focus:ring-primary focus:border-primary" />
+          <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+        </div>
+        <div class="flex justify-end mt-2 space-x-2">
+          <button id="btnBuscar" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-full hover:bg-blue-700">Buscar</button>
+          <button id="btnMostrarTodos" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-full dark:bg-gray-600 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500">Mostrar Todos</button>
+        </div>
+      </div>
+
+      <!-- Contenedor de usuarios -->
+      <div id="contenedorUsuarios" class="mt-6 p-4 bg-card-light dark:bg-card-dark rounded-lg min-h-[200px] flex items-center justify-center shadow-md mb-6">
+        <p class="text-gray-500 dark:text-gray-400">Sin usuarios</p>
+      </div>
+
+      <!-- Formulario Agregar -->
+      <div class="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md mb-6">
+        <h2 class="text-lg font-semibold mb-4">Agregar Usuario</h2>
+        <form id="formAgregar" method="POST" class="space-y-4">
+          <div>
+            <label for="nombre_add" class="block text-sm font-medium">Nombre:</label>
+            <input id="nombre_add" name="nombre" type="text" class="input-field" required />
+          </div>
+          <div>
+            <label for="usuario_add" class="block text-sm font-medium">Usuario:</label>
+            <input id="usuario_add" name="usuario" type="text" class="input-field" required />
+          </div>
+          <div>
+            <label for="contrasena_add" class="block text-sm font-medium">Contraseña:</label>
+            <input id="contrasena_add" name="contrasena" type="password" class="input-field" required />
+          </div>
+          <div>
+            <label for="permiso_add" class="block text-sm font-medium">Permiso:</label>
+            <select id="permiso_add" name="permiso" class="input-field">
+              <option>Administrador</option>
+              <option>Empleado</option>
+            </select>
+          </div>
+          <div>
+            <label for="estado_add" class="block text-sm font-medium">Estado:</label>
+            <select id="estado_add" name="estado" class="input-field">
+              <option>Activo</option>
+              <option>Inactivo</option>
+            </select>
+          </div>
+          <div class="flex justify-end">
+            <button type="submit" id="btnAgregar" class="px-6 py-2 text-white bg-primary rounded-full hover:bg-blue-700 flex items-center gap-2">
+              <span class="material-icons">add</span> Agregar
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Formulario Editar -->
+      <div class="bg-card-light dark:bg-card-dark p-4 rounded-lg shadow-md mt-6">
+        <h2 class="text-lg font-semibold mb-4">Editar Usuario</h2>
+        <form id="formEditar" method="POST" class="space-y-4">
+          <input type="hidden" id="id_edit" name="id" />
+          <div>
+            <label for="nombre_edit" class="block text-sm font-medium">Nombre:</label>
+            <input id="nombre_edit" name="nombre" type="text" class="input-field" />
+          </div>
+          <div>
+            <label for="usuario_edit" class="block text-sm font-medium">Usuario:</label>
+            <input id="usuario_edit" name="usuario" type="text" class="input-field" />
+          </div>
+          <div>
+            <label for="contrasena_edit" class="block text-sm font-medium">Contraseña (Dejar vacío para no cambiar):</label>
+            <input id="contrasena_edit" name="contrasena" type="password" class="input-field" />
+          </div>
+          <div>
+            <label for="permiso_edit" class="block text-sm font-medium">Permiso:</label>
+            <select id="permiso_edit" name="permiso" class="input-field">
+              <option>Administrador</option>
+              <option>Empleado</option>
+            </select>
+          </div>
+          <div>
+            <label for="estado_edit" class="block text-sm font-medium">Estado:</label>
+            <select id="estado_edit" name="estado" class="input-field">
+              <option>Activo</option>
+              <option>Inactivo</option>
+            </select>
+          </div>
+          <div class="flex justify-between items-center">
+            <button type="button" id="btnEliminar" class="flex items-center gap-1 px-4 py-2 text-red-600 border border-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-800">
+              <span class="material-icons">delete</span> Eliminar
+            </button>
+            <button type="submit" id="btnActualizar" class="px-6 py-2 text-white bg-primary rounded-full hover:bg-blue-700 flex items-center gap-2">
+              <span class="material-icons">save</span> Actualizar
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </main>
+
+    <!-- Barra de navegación (con botón Salir) -->
+    <nav class="bg-card-light dark:bg-card-dark border-t border-border-light dark:border-border-dark shadow-lg fixed bottom-0 left-0 w-full z-50">
+      <div class="flex justify-around p-2">
+        <a href="usuario.html" class="flex flex-col items-center text-primary">
+          <span class="material-icons">group</span>
+          <span class="text-xs">Usuarios</span>
+        </a>
+        <a href="productos.html" class="flex flex-col items-center text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
+          <span class="material-icons">inventory_2</span>
+          <span class="text-xs">Productos</span>
+        </a>
+        <a href="ventas.html" class="flex flex-col items-center text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
+          <span class="material-icons">point_of_sale</span>
+          <span class="text-xs">Ventas</span>
+        </a>
+        <a href="reportes.html" class="flex flex-col items-center text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
+          <span class="material-icons">bar_chart</span>
+          <span class="text-xs">Reportes</span>
+        </a>
+        <button onclick="cerrarSesion()" class="flex flex-col items-center text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400">
+          <span class="material-icons">logout</span>
+          <span class="text-xs">Salir</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Script funcional -->
+  <script>
+    // Escapar texto para evitar inyección en innerHTML (pequeña helper)
+    function escapeHtml(str) {
+      if (str == null) return "";
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    async function cargarUsuarios(query = "") {
+      const contenedor = document.getElementById("contenedorUsuarios");
+      contenedor.innerHTML = "<p class='text-gray-500 dark:text-gray-400'>Cargando usuarios...</p>";
+
+      const url = query
+        ? `php/usuarios.php?action=buscar&q=${encodeURIComponent(query)}`
+        : "php/usuarios.php?action=listar";
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        if (!Array.isArray(data) || data.length === 0) {
+          contenedor.innerHTML = "<p class='text-gray-500 dark:text-gray-400'>No hay usuarios registrados.</p>";
+          return;
+        }
+
+        let html = `<table class="w-full text-left border-collapse">
+          <thead><tr class="border-b"><th class="p-2">Nombre</th><th class="p-2">Usuario</th><th class="p-2">Rol</th><th class="p-2">Estado</th><th class="p-2 text-center">Acciones</th></tr></thead><tbody>`;
+
+        data.forEach(u => {
+          // usar encodeURIComponent para que al insertar en atributos JS no rompa las comillas
+          const nombreEnc = encodeURIComponent(u.nombre_completo ?? u.nombre ?? "");
+          const usuarioEnc = encodeURIComponent(u.username ?? u.usuario ?? "");
+          html += `<tr class="border-b">
+            <td class="p-2">${escapeHtml(u.nombre_completo ?? u.nombre ?? "")}</td>
+            <td class="p-2">${escapeHtml(u.username ?? u.usuario ?? "")}</td>
+            <td class="p-2">${escapeHtml(u.rol ?? u.permiso ?? "")}</td>
+            <td class="p-2">${escapeHtml(u.estado ?? "")}</td>
+            <td class="p-2 text-center space-x-2">
+              <button onclick="editarUsuario(${u.id_usuario ?? u.id ?? 0}, '${nombreEnc}', '${usuarioEnc}', '${escapeHtml(u.rol ?? u.permiso ?? "")}', '${escapeHtml(u.estado ?? "")}')" class="text-blue-500 hover:text-blue-700 material-icons">edit</button>
+            </td></tr>`;
+        });
+
+        contenedor.innerHTML = html + "</tbody></table>";
+      } catch (e) {
+        console.error("Error al cargar usuarios:", e);
+        contenedor.innerHTML = "<p class='text-red-500'>Error al cargar usuarios. Revisa la conexión con 'php/usuarios.php'.</p>";
+      }
+    }
+
+    // Buscar
+    document.getElementById("btnBuscar").addEventListener("click", () => {
+      const valor = document.getElementById("inputBuscar").value.trim();
+      cargarUsuarios(valor);
+    });
+
+    // Mostrar todos
+    document.getElementById("btnMostrarTodos").addEventListener("click", () => {
+      document.getElementById("inputBuscar").value = "";
+      cargarUsuarios();
+    });
+
+    // Agregar
+    document.getElementById("formAgregar").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const datos = new FormData(e.target);
+      try {
+        const res = await fetch("php/usuarios.php?action=agregar", { method: "POST", body: datos });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (data.success) {
+          alert("Usuario agregado correctamente.");
+          e.target.reset();
+          cargarUsuarios();
+        } else {
+          alert(data.msg || "Error al agregar usuario.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error de conexión al agregar usuario.");
+      }
+    });
+
+    // Editar (rellenar formulario)
+    function editarUsuario(id, nombreEnc, usuarioEnc, rol, estado) {
+      document.getElementById("id_edit").value = id;
+      document.getElementById("nombre_edit").value = decodeURIComponent(nombreEnc || "");
+      document.getElementById("usuario_edit").value = decodeURIComponent(usuarioEnc || "");
+      document.getElementById("permiso_edit").value = rol || "Empleado";
+      document.getElementById("estado_edit").value = estado || "Activo";
+      // limpiar contraseña para que sea opcional
+      document.getElementById("contrasena_edit").value = "";
+      // hacer scroll al formulario de edición (mejora UX)
+      document.getElementById("formEditar").scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    // Actualizar (no enviar contraseña si está vacía)
+    document.getElementById("formEditar").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const datos = new FormData(e.target);
+      const contra = datos.get("contrasena");
+      if (!contra || (typeof contra === "string" && contra.trim() === "")) {
+        datos.delete("contrasena");
+      }
+      try {
+        const res = await fetch("php/usuarios.php?action=actualizar", { method: "POST", body: datos });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (data.success) {
+          alert("Usuario actualizado correctamente.");
+          // no reset completo para preservar inputs; solo recargar lista y limpiar contraseña
+          document.getElementById("contrasena_edit").value = "";
+          cargarUsuarios();
+        } else {
+          alert(data.msg || "Error al actualizar usuario.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error de conexión al actualizar usuario.");
+      }
+    });
+
+    // Eliminar
+    document.getElementById("btnEliminar").addEventListener("click", async () => {
+      const id = document.getElementById("id_edit").value;
+      if (!id || !confirm("¿Eliminar este usuario?")) return;
+      const datos = new FormData();
+      datos.append("id", id);
+      try {
+        const res = await fetch("php/usuarios.php?action=eliminar", { method: "POST", body: datos });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (data.success) {
+          alert("Usuario eliminado correctamente.");
+          document.getElementById("formEditar").reset();
+          cargarUsuarios();
+        } else {
+          alert(data.msg || "Error al eliminar usuario.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error de conexión al eliminar usuario.");
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", cargarUsuarios);
+  </script>
+</body>
+</html>
